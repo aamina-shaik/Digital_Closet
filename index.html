@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Closet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400;500&family=Lato:wght@300;400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-group">
+        <div class="logo">your <em>closet</em></div>
+        <div class="logo-sub">Digital Wardrobe</div>
+      </div>
+      <div class="header-meta">
+        <div class="item-count-pill" id="item-count-header">0 items</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('wardrobe',this)">Wardrobe</button>
+      <button class="tab" onclick="switchTab('add',this)">+ Add Item</button>
+      <button class="tab" onclick="switchTab('outfit',this)">Outfit Builder</button>
+    </div>
+
+    <!-- ══ WARDROBE PANEL ══ -->
+    <div class="panel active" id="panel-wardrobe">
+
+      <!-- Stats -->
+      <div class="stats-strip" id="stats-strip"></div>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" id="search-input" placeholder="Search your closet…" oninput="renderWardrobe()" />
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <span class="filter-label">Filter</span>
+        <button class="filter-pill active" onclick="filterBy('all',this)">All</button>
+        <button class="filter-pill" onclick="filterBy('tops',this)">Tops</button>
+        <button class="filter-pill" onclick="filterBy('bottoms',this)">Bottoms</button>
+        <button class="filter-pill" onclick="filterBy('outerwear',this)">Outerwear</button>
+        <button class="filter-pill" onclick="filterBy('shoes',this)">Shoes</button>
+        <button class="filter-pill" onclick="filterBy('accessories',this)">Accessories</button>
+        <button class="filter-pill" onclick="filterBy('dresses',this)">Dresses</button>
+      </div>
+
+      <!-- Sort -->
+      <div class="wardrobe-toolbar">
+        <div class="sort-wrap">
+          <span class="sort-label">Sort</span>
+          <select id="sort-select" onchange="renderWardrobe()">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="az">A → Z</option>
+            <option value="za">Z → A</option>
+          </select>
+        </div>
+        <span id="result-count" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);"></span>
+      </div>
+
+      <div class="wardrobe-grid" id="wardrobe-grid"></div>
+      <div class="empty-state" id="wardrobe-empty" style="display:none;">
+        <div class="empty-icon">🧺</div>
+        Your closet is empty.<br>Add some items to get started.
+        <div class="empty-cta">
+          <button class="btn btn-accent" onclick="switchTabByName('add')">+ Add first item</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADD ITEM PANEL ══ -->
+    <div class="panel" id="panel-add">
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" accept="image/*" id="file-input" onchange="handleFile(event)" />
+        <div class="upload-icon">📷</div>
+        <div class="upload-text"><strong>Click to upload</strong> or drag &amp; drop<br>a photo of your clothing item
+        </div>
+      </div>
+
+      <div class="preview-wrap" id="preview-wrap">
+        <img id="preview-img" alt="Preview" />
+        <div class="preview-info">
+          <div class="preview-label">Preview</div>
+          <div class="preview-filename" id="preview-filename">—</div>
+          <button class="preview-clear" onclick="clearPreview()">✕ Clear image</button>
+        </div>
+      </div>
+
+      <div class="meta-form">
+        <div class="form-field">
+          <label class="form-label" for="item-name">Item name</label>
+          <input type="text" id="item-name" placeholder="e.g. White Linen Shirt" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="item-category">Category</label>
+          <select id="item-category">
+            <option value="">Select category…</option>
+            <option value="tops">Tops</option>
+            <option value="bottoms">Bottoms</option>
+            <option value="outerwear">Outerwear</option>
+            <option value="shoes">Shoes</option>
+            <option value="accessories">Accessories</option>
+            <option value="dresses">Dresses</option>
+          </select>
+        </div>
+        <button class="btn btn-accent" onclick="addItem()" style="align-self:flex-end;">Add to closet</button>
+      </div>
+
+      <div class="divider"></div>
+      <div
+        style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">
+        Your items are saved locally and persist across page refreshes. Only you can remove them.</div>
+    </div>
+
+    <!-- ══ OUTFIT PANEL ══ -->
+    <div class="panel" id="panel-outfit">
+      <div id="no-outfit-msg" class="no-outfit-msg">
+        <span class="no-outfit-icon">✨</span>
+        Generate a random outfit from your wardrobe.<br>You need at least 2 items to get started.
+      </div>
+
+      <div id="outfit-result" style="display:none;">
+        <div class="outfit-header">
+          <div class="outfit-badge">✨ Today's Pick</div>
+        </div>
+        <div class="outfit-grid" id="outfit-grid"></div>
+      </div>
+
+      <div class="outfit-actions">
+        <button class="btn btn-accent" onclick="generateOutfit()">⚙ Generate outfit</button>
+        <button class="btn btn-outline" onclick="saveOutfit()" id="save-btn" style="display:none;">+ Save this
+          outfit</button>
+      </div>
+      <div id="outfit-msg"></div>
+
+      <div class="saved-outfits" id="saved-section" style="display:none;">
+        <div class="divider"></div>
+        <div class="saved-section-header">
+          <div class="saved-label">Saved Outfits <span class="count-badge" id="saved-count">0</span></div>
+          <button class="btn btn-ghost" onclick="clearAllSaved()" style="font-size:10px;">Clear all</button>
+        </div>
+        <div id="saved-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
